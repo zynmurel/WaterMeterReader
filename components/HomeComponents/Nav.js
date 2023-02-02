@@ -32,7 +32,7 @@ const styles = StyleSheet.create({
     },
     text1:{
       fontSize:27,
-      fontWeight:'bold',
+      fontWeight:'900',
       color:'white'
     },
     text2:{

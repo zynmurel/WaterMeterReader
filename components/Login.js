@@ -89,7 +89,7 @@ const styles = StyleSheet.create({
   },
   text1:{
     fontSize:50,
-    fontWeight:'bold',
+    fontWeight:'900',
   },
   text2:{
     fontSize:20,
