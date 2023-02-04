@@ -9,12 +9,20 @@ const Body = () => {
     const [barangay, setBarangay] = useState("") 
     const [purok, setPurok] = useState("") 
     const [modalVisible, setModalVisible] = useState(false);
+    const brgyprk = GetData("brgyprk")
+    const toReadConsumers = GetData(`toReadConsumers/${!barangay?'Boyog Proper':barangay}/${!purok? '5': purok}`)
+
+    const {data, isPending, error, reload, setReload} = brgyprk
+    const {data:toRead, isPending:toReadIsPending, error:toReadError, reload:toReadReload, setReload:toReadSetReload} = toReadConsumers
+    console.log(toRead!==null && toRead.length)
+
     const generate = () => {
         console.log("Generated")
     
       }
-    const brgyprk = GetData("brgyprk")
-    const {data, isPending, error, reload, setReload} = brgyprk
+    const onSearch = () => {
+        toReadSetReload(toReadReload? false:true)
+    }
     let allbarangay = []
     let allpurok = data!==null && barangay ? data[barangay].sort() : [];
     if(data!==null){
@@ -44,27 +52,29 @@ const Body = () => {
           fontSize: 16,
           color: "#fff",
           alignSelf: "center",
-          textTransform: "uppercase"
+          textTransform: "uppercase",
+          marginLeft:10
         },
         appButtonContainer: {
           elevation: 8,
           backgroundColor: isPending || !purok?"gray":"rgb(12,20,52)",
           borderRadius: 5,
           paddingVertical: 15,
-          paddingHorizontal: 50,
+          paddingHorizontal: 20,
           margin:15,
+          flexDirection:'row',
+          justifyContent:'flex-start'
         },centeredView: {
             flex: 1,
             justifyContent: 'center',
             alignItems: 'center',
             marginTop: 0,
-            backgroundColor:"rgba(0, 2, 42, 0.50)"
+            backgroundColor:"rgba(0, 0, 0, 0.61)"
           },
           modalView: {
             margin: 20,
             backgroundColor: 'white',
             borderRadius: 5,
-            padding: 35,
             alignItems: 'center',
             shadowColor: '#000',
             shadowOffset: {
@@ -74,11 +84,10 @@ const Body = () => {
             shadowOpacity: 0.25,
             shadowRadius: 4,
             elevation: 5,
-            height:'80%',
             width:"90%"
           },
           button: {
-            borderRadius: 20,
+            borderRadius: 5,
             padding: 10,
             elevation: 2,
           },
@@ -86,17 +95,49 @@ const Body = () => {
             backgroundColor: '#F194FF',
           },
           buttonClose: {
-            backgroundColor: '#2196F3',
+            backgroundColor: toRead && toRead.length===0? 'rgba(173, 173, 173, 1)':'#27B735',
           },
           textStyle: {
             color: 'white',
-            fontWeight: 'bold',
             textAlign: 'center',
+            fontSize:18
           },
-          modalText: {
-            marginBottom: 15,
+          modalBarangay: {
             textAlign: 'center',
+            fontWeight:"900",
+            fontSize:30,
+            color:'white'
           },
+          modalPurok: {
+            textAlign: 'center',
+            fontWeight:'600',
+            fontSize:18,
+            color:'white'
+          },
+          cancel:{
+            backgroundColor:'rgba(136, 136, 136, 1)',
+            borderRadius: 5,
+            padding: 10,
+            elevation: 2,
+            marginHorizontal:10
+          },
+          buttonsContainer:{
+            flexDirection:'row',
+            width:'100%',
+            justifyContent:'flex-end',
+            padding:10
+          },
+          contentText:{
+            fontSize:22,
+            
+          },
+          content:{
+            width:'100%', 
+            alignItems:'center', 
+            marginHorizontal:20,
+            height:120,
+            justifyContent:'center'
+          }
     })
     return ( 
         <>
@@ -116,7 +157,6 @@ const Body = () => {
                 data={allbarangay}
                 disabled={isPending || allbarangay.length===0 ?true:false}
                 onSelect={(selectedItem, index) => {
-                    console.log(selectedItem, index)
                     setBarangay(selectedItem)
                 }}
                 itemStyle={{justifyContent: 'flex-start|flex-end|center', color:'white'}}
@@ -134,16 +174,19 @@ const Body = () => {
                 disabled={isPending || allpurok.length===0? true:false}
                 dropdownStyle={{ marginTop:-28 }}
                 onSelect={(selectedItem, index) => {
-                    console.log(selectedItem, index)
                     setPurok(selectedItem)
                 }}
                 itemStyle={{justifyContent: 'flex-start|flex-end|center', color:'white'}}
             />
                 </View>
                 <TouchableOpacity 
-                onPress={ ()=>{ setModalVisible(true)}} 
+                onPress={ ()=>{ 
+                    setModalVisible(true)
+                    onSearch();
+                }} 
                 style={styles.appButtonContainer}
                 disabled={ isPending || !purok? true:false}>
+                    <Ionicons name="search" color={"white"} size={20}/>
                     <Text style={styles.appButtonText} >{"Search"}</Text>
                 </TouchableOpacity>
 
@@ -156,12 +199,44 @@ const Body = () => {
                     }}>
                     <View style={styles.centeredView}>
                     <View style={styles.modalView}>
-                        <Text style={styles.modalText}>Hello World!</Text>
-                        <TouchableOpacity
-                        style={[styles.button, styles.buttonClose]}
-                        onPress={() => setModalVisible(!modalVisible)}>
-                        <Text style={styles.textStyle}>Hide Modal</Text>
-                        </TouchableOpacity>
+                        <View style={{ width:'100%',  backgroundColor: 'rgb(12,20,52)', padding: 10, borderTopLeftRadius:5, borderTopEndRadius:5 }}>
+                        <Text style={styles.modalBarangay}>{`${barangay}`}</Text>
+                        <Text style={styles.modalPurok}>{` Purok ${purok} `}</Text>
+                        </View>
+
+                        <View style={styles.content}>
+                        {!toReadIsPending && toRead && 
+                        <View style={{ flexDirection:'column', alignItems:'center' }}>
+                        <Ionicons name="people" color={"white"} size={30} style={{ backgroundColor:'rgb(12,20,52)', padding:10, borderRadius:40}}/>
+                        <Text style={{ ...styles.contentText, }}>
+                            {`${toRead.length} Consumer/s`}
+                        </Text>
+                        
+                        </View>}
+                        {toReadIsPending && 
+                        <Text style={{ ...styles.contentText, }}>
+                            Fetching...
+                        </Text>}
+                        {toReadError && 
+                        <Text style={{ ...styles.contentText, }}>
+                            Fetching failed.
+                        </Text>}
+                        </View>
+                        
+                        <View style={styles.buttonsContainer}>
+                            <TouchableOpacity
+                            style={styles.cancel}
+                            onPress={() => setModalVisible(!modalVisible)}>
+                            <Text style={{ ...styles.textStyle, color:'white' }}>Cancel</Text>
+                            </TouchableOpacity>
+
+                            <TouchableOpacity
+                            style={[styles.button, styles.buttonClose]}
+                            disabled={toRead && toRead.length===0? true:false}
+                            onPress={() => setModalVisible(!modalVisible)}>
+                            <Text style={styles.textStyle}>Generate</Text>
+                            </TouchableOpacity>
+                        </View>
                     </View>
                     </View>
                 </Modal>

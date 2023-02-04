@@ -7,7 +7,7 @@ const GetData = (url) => {
     const [reload, setReload] = useState(false)
 
     const instance = axios.create({
-        baseURL: 'http://192.168.1.20:8080/api/',
+        baseURL: 'http://192.168.254.174:8080/api/',
         headers:{
             'Content-type' : 'application/json'
         }
@@ -17,8 +17,7 @@ const GetData = (url) => {
                 const getData = async () => {
                     try {
                     setIsPending(true)
-                    const response = await instance.get('brgyprk');
-                    console.log(response.data)
+                    const response = await instance.get(url);
                     setData(response.data)
                     setIsPending(false)
                     setError(null)

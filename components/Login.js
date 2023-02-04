@@ -1,34 +1,85 @@
-import { useState } from 'react';
-import { Text, TextInput, TouchableOpacity, View, StyleSheet } from 'react-native';
+import { useState, useEffect } from 'react';
+import { Text, TextInput, TouchableOpacity, View, StyleSheet, SafeAreaView} from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons'
 import { Alert } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import http from '../Hooks/LoginManager';
+import AsyncStorage from '@react-native-async-storage/async-storage'
 const Login = () => {
     const [ email ,setEmail ] = useState('')
     const [ password ,setPassword ] = useState('')
     const [eye, setEye] = useState(true)
     const [alertErrorEmail, setAlertErrorEmail ] = useState(false)
     const [alertErrorPassword, setAlertErrorPassword ] = useState(false)
+    const navigation = useNavigation()
+
+    const storeDataAsyncStorage = async (key, value) => {
+      try {
+        await AsyncStorage.setItem(
+          key,
+          value,
+        );
+      } catch (error) {
+        Alert.alert("Saving Data Error!", "Please try again",[
+          {text:"Ok", onPress: ()=> {}}
+        ])
+      }
+    }
+
+    useEffect(()=>{
+      const getToken = async () => {
+        const token = await AsyncStorage.getItem("user_token")
+        token && navigation.navigate("Home")
+      }
+      getToken()
+    },)
 
     const inputEmail = (text) => {
         setEmail(text)
         setAlertErrorEmail(false)
+        setAlertErrorPassword(false)
     }
     const inputPassword = (text) => {
         setPassword(text)
         setAlertErrorPassword(false)
+        setAlertErrorEmail(false)
     }
 
     const login =()=> {
       if(email===""){
         Alert.alert("Email Error!", "Please input email.",[
-          {text:"Undestood", onPress: ()=> {console.log("Maui")}}
+          {text:"Undestood", onPress: ()=> {}}
         ])
         setAlertErrorEmail(true)
     }else if(password===""){
       Alert.alert("Password Error!", "Please input password.",[
-        {text:"Undestood", onPress: ()=> {console.log("Maui")}}
+        {text:"Undestood", onPress: ()=> {}}
       ])
       setAlertErrorPassword(true)
+  }else{
+    http.post('/login', {email:email, password:password}).then((res)=>{
+      if(res.data.data.user.user_type!=="Reader"){
+        Alert.alert("Login Error!", "This user is not a Reader",[
+          {text:"Exit", onPress: ()=> {}}
+        ])
+        throw Error("I am error")
+      }
+
+      if(res.status === 200){
+        storeDataAsyncStorage("user_type",res.data.data.user.user_type)
+        storeDataAsyncStorage("user_token",res.data.data.token)
+        storeDataAsyncStorage("user_email",res.data.data.user.email)
+        storeDataAsyncStorage("user_id",res.data.data.user.user_id.toString())
+      }
+      navigation.navigate("Home")
+    }).catch((err)=>{
+      Alert.alert("Login Error!", err.response.data.message,[
+        {text:"Undestood", onPress: ()=> {console.log("Maui")}}
+      ])
+    console.log(err.response.data.line)
+      setAlertErrorEmail(true)
+      setAlertErrorPassword(true)
+    })
   }
     }
 
@@ -37,7 +88,7 @@ const Login = () => {
     }
 
     return ( 
-      
+      <SafeAreaView style={styles.safeareaview}>
       <View style={styles.login}>
       <Text style={styles.text1}>BALILIHAN</Text>
       <Text style={styles.text2}>WATERWORKS</Text>
@@ -72,7 +123,7 @@ const Login = () => {
         <Text style={styles.appButtonText} >{"Login"}</Text>
     </TouchableOpacity>
     </View>
-    
+    </SafeAreaView>
      );
 }
 
@@ -161,6 +212,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor:"rgb(12,20,52)"
+  },  
+  safeareaview: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor:"rgb(12,30,50)"
   },
 })
  

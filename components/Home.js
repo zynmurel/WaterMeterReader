@@ -3,6 +3,7 @@ import Body from "./HomeComponents/Body";
 import Nav from "./HomeComponents/Nav";
 
 const Home = () => {
+    
     return ( 
         <>
          <View style={styles.home}>

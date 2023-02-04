@@ -1,7 +1,19 @@
-import { StyleSheet, View, Text } from "react-native";
+import { StyleSheet, View, Text, TouchableOpacity } from "react-native";
 import Ionicons from '@expo/vector-icons/Ionicons'
+import AsyncStorage from '@react-native-async-storage/async-storage'
+import {useNavigation} from '@react-navigation/native'
 
 const Nav = () => {
+    const navigation = useNavigation()
+    const pressPerson = async() => {
+         AsyncStorage.setItem("user_type","")
+         AsyncStorage.setItem("user_token","")
+         AsyncStorage.setItem("user_email","")
+         AsyncStorage.setItem("user_id","")
+          navigation.navigate("Login")
+          const token = await AsyncStorage.getItem("user_token")
+          console.log(token)
+    }
     return ( 
         <>
             <View style={styles.nav}>
@@ -12,6 +24,9 @@ const Nav = () => {
                         <Text style={styles.text2}>WATERWORKS</Text>
                     </View>
                 </View>
+                <TouchableOpacity style={styles.reader} onPress={pressPerson}>
+                    <Ionicons name={"person"} color="rgb(12,30,50)" size={32}/>
+                </TouchableOpacity>
             </View>
         </>
      );
@@ -19,7 +34,7 @@ const Nav = () => {
 
 const styles = StyleSheet.create({
     nav:{
-        flex:1,
+        height:70,
         backgroundColor:"rgb(12,30,50)",
         width:'100%',
         alignItems:'center',
@@ -41,6 +56,12 @@ const styles = StyleSheet.create({
       color:'white'
     },
     navText:{
+    },
+    reader:{
+        backgroundColor:'white',
+        padding:5,
+        borderRadius:30,
+        marginHorizontal:20
     }
 })
  
