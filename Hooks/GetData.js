@@ -1,13 +1,14 @@
 import axios from 'axios'
 import { useEffect, useState } from 'react';
+import BaseUrl from './BaseUrl';
 const GetData = (url) => {
+    const baseUrl = BaseUrl()
     const [data, setData] = useState(null);
     const [isPending, setIsPending] = useState(true)
     const [error, setError] = useState(null)
     const [reload, setReload] = useState(false)
-
     const instance = axios.create({
-        baseURL: 'http://192.168.254.174:8080/api/',
+        baseURL: `${baseUrl}/api/`,
         headers:{
             'Content-type' : 'application/json'
         }

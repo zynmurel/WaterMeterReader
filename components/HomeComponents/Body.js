@@ -2,24 +2,21 @@ import { StyleSheet, View, Text, TouchableOpacity, Modal } from "react-native";
 import SelectDropdown from 'react-native-select-dropdown'
 import { Ionicons } from '@expo/vector-icons';
 import SelectBarangay from "./SelectBarangay";
-import {  useState } from "react";
+import {  useEffect, useState } from "react";
 import GetData from "../../Hooks/GetData";
+import ToGenerateModal from "./ToGenerateModal";
+import ListOfBrgyPrk from "./ListOfBrgyPrk";
 
-const Body = () => {
+const Body = ({db, data:generated, setReloadGenerated, reloadGenerated}) => {
     const [barangay, setBarangay] = useState("") 
     const [purok, setPurok] = useState("") 
     const [modalVisible, setModalVisible] = useState(false);
     const brgyprk = GetData("brgyprk")
-    const toReadConsumers = GetData(`toReadConsumers/${!barangay?'Boyog Proper':barangay}/${!purok? '5': purok}`)
+    const toReadConsumers = GetData(`toReadConsumers/${!barangay?'Baucan Sur':barangay}/${!purok? '1': purok}`)
 
     const {data, isPending, error, reload, setReload} = brgyprk
     const {data:toRead, isPending:toReadIsPending, error:toReadError, reload:toReadReload, setReload:toReadSetReload} = toReadConsumers
-    console.log(toRead!==null && toRead.length)
 
-    const generate = () => {
-        console.log("Generated")
-    
-      }
     const onSearch = () => {
         toReadSetReload(toReadReload? false:true)
     }
@@ -46,7 +43,7 @@ const Body = () => {
             fontSize:50,
             fontWeight:'900',
             color:'rgb(12,20,52)',
-            padding:10
+            padding:0
         },
         appButtonText: {
           fontSize: 16,
@@ -64,80 +61,7 @@ const Body = () => {
           margin:15,
           flexDirection:'row',
           justifyContent:'flex-start'
-        },centeredView: {
-            flex: 1,
-            justifyContent: 'center',
-            alignItems: 'center',
-            marginTop: 0,
-            backgroundColor:"rgba(0, 0, 0, 0.61)"
-          },
-          modalView: {
-            margin: 20,
-            backgroundColor: 'white',
-            borderRadius: 5,
-            alignItems: 'center',
-            shadowColor: '#000',
-            shadowOffset: {
-              width: 0,
-              height: 2,
-            },
-            shadowOpacity: 0.25,
-            shadowRadius: 4,
-            elevation: 5,
-            width:"90%"
-          },
-          button: {
-            borderRadius: 5,
-            padding: 10,
-            elevation: 2,
-          },
-          buttonOpen: {
-            backgroundColor: '#F194FF',
-          },
-          buttonClose: {
-            backgroundColor: toRead && toRead.length===0? 'rgba(173, 173, 173, 1)':'#27B735',
-          },
-          textStyle: {
-            color: 'white',
-            textAlign: 'center',
-            fontSize:18
-          },
-          modalBarangay: {
-            textAlign: 'center',
-            fontWeight:"900",
-            fontSize:30,
-            color:'white'
-          },
-          modalPurok: {
-            textAlign: 'center',
-            fontWeight:'600',
-            fontSize:18,
-            color:'white'
-          },
-          cancel:{
-            backgroundColor:'rgba(136, 136, 136, 1)',
-            borderRadius: 5,
-            padding: 10,
-            elevation: 2,
-            marginHorizontal:10
-          },
-          buttonsContainer:{
-            flexDirection:'row',
-            width:'100%',
-            justifyContent:'flex-end',
-            padding:10
-          },
-          contentText:{
-            fontSize:22,
-            
-          },
-          content:{
-            width:'100%', 
-            alignItems:'center', 
-            marginHorizontal:20,
-            height:120,
-            justifyContent:'center'
-          }
+        }
     })
     return ( 
         <>
@@ -189,57 +113,36 @@ const Body = () => {
                     <Ionicons name="search" color={"white"} size={20}/>
                     <Text style={styles.appButtonText} >{"Search"}</Text>
                 </TouchableOpacity>
-
-                <Modal
-                    animationType="slide"
-                    transparent={true}
-                    visible={modalVisible}
-                    onRequestClose={() => {
-                    setModalVisible(!modalVisible);
+                {/* <TouchableOpacity onPress={()=>{
+                    setReloadGenerated(reloadGenerated?false:true)
+                    db.transaction(tx => {
+                        tx.executeSql(
+                          'DROP TABLE IF EXISTS readBoctol2;'
+                        );
+                      });
                     }}>
-                    <View style={styles.centeredView}>
-                    <View style={styles.modalView}>
-                        <View style={{ width:'100%',  backgroundColor: 'rgb(12,20,52)', padding: 10, borderTopLeftRadius:5, borderTopEndRadius:5 }}>
-                        <Text style={styles.modalBarangay}>{`${barangay}`}</Text>
-                        <Text style={styles.modalPurok}>{` Purok ${purok} `}</Text>
-                        </View>
+                    <Text>Maui</Text>
+                </TouchableOpacity> */}
+                <ListOfBrgyPrk 
+                db={db}
+                generated={generated}
+                reloadGenerated={reloadGenerated} 
+                setReloadGenerated={setReloadGenerated}/>
 
-                        <View style={styles.content}>
-                        {!toReadIsPending && toRead && 
-                        <View style={{ flexDirection:'column', alignItems:'center' }}>
-                        <Ionicons name="people" color={"white"} size={30} style={{ backgroundColor:'rgb(12,20,52)', padding:10, borderRadius:40}}/>
-                        <Text style={{ ...styles.contentText, }}>
-                            {`${toRead.length} Consumer/s`}
-                        </Text>
-                        
-                        </View>}
-                        {toReadIsPending && 
-                        <Text style={{ ...styles.contentText, }}>
-                            Fetching...
-                        </Text>}
-                        {toReadError && 
-                        <Text style={{ ...styles.contentText, }}>
-                            Fetching failed.
-                        </Text>}
-                        </View>
-                        
-                        <View style={styles.buttonsContainer}>
-                            <TouchableOpacity
-                            style={styles.cancel}
-                            onPress={() => setModalVisible(!modalVisible)}>
-                            <Text style={{ ...styles.textStyle, color:'white' }}>Cancel</Text>
-                            </TouchableOpacity>
-
-                            <TouchableOpacity
-                            style={[styles.button, styles.buttonClose]}
-                            disabled={toRead && toRead.length===0? true:false}
-                            onPress={() => setModalVisible(!modalVisible)}>
-                            <Text style={styles.textStyle}>Generate</Text>
-                            </TouchableOpacity>
-                        </View>
-                    </View>
-                    </View>
-                </Modal>
+                <ToGenerateModal 
+                modalVisible={modalVisible}
+                toRead={toRead}
+                toReadError={toReadError}
+                toReadIsPending={toReadIsPending}
+                barangay={barangay}
+                purok={purok}
+                setModalVisible={setModalVisible}
+                db={db}
+                generated={generated}
+                reloadGenerated={reloadGenerated} 
+                setReloadGenerated={setReloadGenerated}
+                />
+                
             </View>
         </>
      );

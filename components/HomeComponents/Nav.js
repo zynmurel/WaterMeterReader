@@ -25,7 +25,7 @@ const Nav = () => {
                     </View>
                 </View>
                 <TouchableOpacity style={styles.reader} onPress={pressPerson}>
-                    <Ionicons name={"person"} color="rgb(12,30,50)" size={32}/>
+                    <Ionicons name={"person"} color="rgb(12,30,50)" size={25}/>
                 </TouchableOpacity>
             </View>
         </>
@@ -34,7 +34,7 @@ const Nav = () => {
 
 const styles = StyleSheet.create({
     nav:{
-        height:70,
+        height:60,
         backgroundColor:"rgb(12,30,50)",
         width:'100%',
         alignItems:'center',
@@ -46,12 +46,12 @@ const styles = StyleSheet.create({
         flexDirection:'row'
     },
     text1:{
-      fontSize:27,
+      fontSize:25,
       fontWeight:'900',
       color:'white'
     },
     text2:{
-      fontSize:16,
+      fontSize:14,
       marginTop:-5,
       color:'white'
     },
