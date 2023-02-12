@@ -1,32 +1,35 @@
 import { FlatList, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { LinearGradient } from 'expo-linear-gradient';
+import { useNavigation } from "@react-navigation/native";
 
 
-const ListOfBrgyPrk = ({generated, db, reloadGenerated, setReloadGenerated}) => {
-    console.log(generated)
+const ListOfBrgyPrk = ({generated, db, reloadGenerated, setReloadGenerated}) => { 
+    const navigation = useNavigation()
     const styles = StyleSheet.create({
         container:{
             width:'90%',
         },
         toread:{
-            backgroundColor:'white',
+            backgroundColor:'rgba(52, 53, 65, 1)',
             width:'100%',
             height:380,
-            padding:10,
+            paddingHorizontal:10,
+            paddingVertical:5,
             borderRadius:5
         },
-        text1:{
-            fontSize:20,
-            marginHorizontal:10,
-            marginBottom:10,
-            fontWeight:'bold'
+        text1:{ 
+            fontSize:17,
+            fontWeight:'600',
+            color:'rgba(89, 89, 89, 1)',
+            width:'100%',
+            paddingHorizontal:10,
+            marginBottom:3,
         },
         onebrgyprk:{
             backgroundColor:'white',
             padding:15,
-            borderRadius:10,
-            marginBottom:8,
-            elevation: 5,
+            marginBottom:2,
+            elevation: 2,
             shadowColor: 'black',
             shadowOpacity: 0.26,
             shadowRadius: 6,
@@ -34,7 +37,9 @@ const ListOfBrgyPrk = ({generated, db, reloadGenerated, setReloadGenerated}) => 
                 width: 0.1,
                 height: -0.1, },
             backgroundColor: 'white',
-            borderRadius: 10
+            borderRadius: 2,
+            borderWidth:1,
+            borderColor:'rgba(218, 218, 218, 1)'
         },
         onebrgyprktext:{
             fontSize:19,
@@ -56,18 +61,20 @@ const ListOfBrgyPrk = ({generated, db, reloadGenerated, setReloadGenerated}) => 
             color:'gray'
         }
     })
-    const byBrgyPrk = (barangay, purok, totalConsumer, totalReaded, name) => {
+    const byBrgyPrk = (barangay, purok, totalConsumer, totalReaded, name, item) => {
         return (
             <TouchableOpacity 
              onPress={()=>{
-                    db.transaction(tx => {
-                        tx.executeSql(
-                          `DROP TABLE IF EXISTS ${name};`
-                        );
-                      });
-                      setReloadGenerated(reloadGenerated?false:true)
+                    // db.transaction(tx => {
+                    //     tx.executeSql(
+                    //       `DROP TABLE IF EXISTS ${name};`
+                    //     );
+                    //   });
+                    //   setReloadGenerated(reloadGenerated?false:true)
+                    console.log(item)
+                    navigation.navigate("Reading", {item})
              }}>
-             <LinearGradient colors={['#FFDD98', '#FFF0D1', '#F9F2E6']} style={styles.onebrgyprk}>
+             <LinearGradient colors={['white', 'white', '#F9F2E6']} style={styles.onebrgyprk}>
                 <Text style={styles.onebrgyprktext}>{barangay}</Text>
                 <Text style={styles.onebrgyprktext2}>{`Purok ${purok}`}</Text>
                 <Text style={styles.onebrgyprktext2}>{`Readed : ${totalReaded}/${totalConsumer}`}</Text>
@@ -86,7 +93,7 @@ const ListOfBrgyPrk = ({generated, db, reloadGenerated, setReloadGenerated}) => 
                 {generated.length!==0 && <FlatList
                     data={generated}
                     renderItem={({item}) => {
-                        return byBrgyPrk(item.barangay, item.purok, item.totalConsumer, item.totalReaded,item.name)
+                        return byBrgyPrk(item.barangay, item.purok, item.totalConsumer, item.totalReaded,item.name, item)
                     }}
                     keyExtractor={item => item.id}
                 />}

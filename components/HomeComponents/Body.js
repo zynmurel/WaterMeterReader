@@ -16,6 +16,8 @@ const Body = ({db, data:generated, setReloadGenerated, reloadGenerated}) => {
 
     const {data, isPending, error, reload, setReload} = brgyprk
     const {data:toRead, isPending:toReadIsPending, error:toReadError, reload:toReadReload, setReload:toReadSetReload} = toReadConsumers
+    const dateNow = new Date()
+  const month= ["January","February","March","April","May","June","July","August","September","October","November","December"];
 
     const onSearch = () => {
         toReadSetReload(toReadReload? false:true)
@@ -66,7 +68,7 @@ const Body = ({db, data:generated, setReloadGenerated, reloadGenerated}) => {
     return ( 
         <>
             <View style={styles.body}>
-                <Text style={ styles.date}>JAN 2022</Text>
+                <Text style={ styles.date}>{`${month[dateNow.getMonth()].slice(0,3).toUpperCase()} ${dateNow.getFullYear()}`}</Text>
                 <View style={styles.purokbarangay}>
                 <SelectDropdown 
                 style={{ color:'red' }}
@@ -117,7 +119,7 @@ const Body = ({db, data:generated, setReloadGenerated, reloadGenerated}) => {
                     setReloadGenerated(reloadGenerated?false:true)
                     db.transaction(tx => {
                         tx.executeSql(
-                          'DROP TABLE IF EXISTS readBoctol2;'
+                          'DROP TABLE IF EXISTS readBoyogNorte4;'
                         );
                       });
                     }}>
@@ -130,6 +132,7 @@ const Body = ({db, data:generated, setReloadGenerated, reloadGenerated}) => {
                 setReloadGenerated={setReloadGenerated}/>
 
                 <ToGenerateModal 
+                toReadReload={toReadReload}
                 modalVisible={modalVisible}
                 toRead={toRead}
                 toReadError={toReadError}

@@ -1,5 +1,6 @@
 import { Modal, View, Text, TouchableOpacity } from "react-native";
 import { Ionicons } from '@expo/vector-icons';
+import { useEffect, useState } from "react";
 const ToGenerateModal = ({
   modalVisible, 
   toRead, 
@@ -9,10 +10,20 @@ const ToGenerateModal = ({
   purok, 
   setModalVisible, 
   db, 
+  toReadReload,
   generated,
   reloadGenerated, 
   setReloadGenerated}) => {
-    console.log(generated.length)
+    const [activeGenerate, setActiveGenerate] = useState(false)
+    useEffect(()=>{
+      let x= false
+      generated.forEach((gen)=>{
+        if(gen.name === `read${barangay.replace(" ","")}${purok}`){
+          x = true
+        }
+      })
+      setActiveGenerate(x)
+    },[toReadReload])
     const onGenerate =() => {
         db.transaction(tx => {
             tx.executeSql(`CREATE TABLE IF NOT EXISTS read${barangay.replace(" ","")}${purok} (consumer_id TEXT, first_name TEXT, middle_name TEXT, last_name TEXT, gender TEXT, phone TEXT, barangay, TEXT, purok TEXT, service_period_id_to_be INTEGER, service_period TEXT, reading_id INTEGER, previous_reading INTEGER, present_reading INTEGER, reading_date INTEGER, reading_latest INTEGER, reading_img TEXT)`)  
@@ -64,7 +75,7 @@ const ToGenerateModal = ({
             elevation: 2,
           },
           buttonClose: {
-            backgroundColor: toRead && toRead.length===0 || generated.length>=5? 'rgba(173, 173, 173, 1)':'#27B735',
+            backgroundColor: toReadIsPending || (toRead && toRead.length===0) || generated.length>=5 ||activeGenerate? 'rgba(173, 173, 173, 1)':'#27B735',
           },
           textStyle: {
             color: 'white',
@@ -106,11 +117,14 @@ const ToGenerateModal = ({
             marginHorizontal:20,
             height:120,
             justifyContent:'center'
+          },
+          alerttext:{
+            fontSize:12
           }
     }
     return ( 
     <Modal
-        animationType="slide"
+        animationType='slide'
         transparent={true}
         visible={modalVisible}
         onRequestClose={() => {
@@ -132,6 +146,11 @@ const ToGenerateModal = ({
             </Text>
             
             </View>}
+            {activeGenerate && !toReadIsPending &&
+              <Text style={{ ...styles.alerttext, }}>
+                ( This Barangay's Purok is already generated )
+            </Text>
+            }
             {toReadIsPending && 
             <Text style={{ ...styles.contentText, }}>
                 Fetching...
@@ -157,7 +176,7 @@ const ToGenerateModal = ({
 
                 <TouchableOpacity
                 style={[styles.button, styles.buttonClose]}
-                disabled={(toRead && toRead.length===0) || generated.length>=5? true:false}
+                disabled={toReadIsPending || (toRead && toRead.length===0) || generated.length>=5 || activeGenerate ? true:false}
                 onPress={() => {
                     setModalVisible(!modalVisible)
                     onGenerate()

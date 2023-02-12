@@ -3,14 +3,13 @@ import Ionicons from '@expo/vector-icons/Ionicons'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import {useNavigation} from '@react-navigation/native'
 
-const Nav = () => {
-    const navigation = useNavigation()
+const Nav = ({setIsLogin}) => {
     const pressPerson = async() => {
          AsyncStorage.setItem("user_type","")
          AsyncStorage.setItem("user_token","")
          AsyncStorage.setItem("user_email","")
          AsyncStorage.setItem("user_id","")
-          navigation.navigate("Login")
+          setIsLogin(false)
           const token = await AsyncStorage.getItem("user_token")
           console.log(token)
     }
@@ -34,11 +33,12 @@ const Nav = () => {
 
 const styles = StyleSheet.create({
     nav:{
-        height:60,
+        height:85,
         backgroundColor:"rgb(12,30,50)",
         width:'100%',
         alignItems:'center',
         flexDirection:'row',
+        paddingTop:25,
         justifyContent:'space-between'
     },
     logo:{

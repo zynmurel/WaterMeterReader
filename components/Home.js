@@ -1,10 +1,10 @@
 import { Text, View, StyleSheet } from "react-native";
 import Body from "./HomeComponents/Body";
 import Nav from "./HomeComponents/Nav";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import * as SQLite from 'expo-sqlite'
 
-const Home = () => {
+const Home = ({reloadHome, setReloadHome, setIsLogin}) => {
     const [data , setData] = useState([])
     const [reloadGenerated, setReloadGenerated] = useState(true)
     const db = SQLite.openDatabase("ready.db")
@@ -77,13 +77,14 @@ const Home = () => {
             })
             .catch(error => console.error(error));
         });
-    },[reloadGenerated])
+    },[reloadGenerated, reloadHome])
     
 
     return ( 
         <>
          <View style={styles.home}>
-            <Nav/>
+            <Nav
+            setIsLogin={setIsLogin}/>
             <Body 
             db={db} 
             data={data}
@@ -100,7 +101,6 @@ const styles = StyleSheet.create({
         flex:1,
         backgroundColor:'white',
         width:"100%",
-        marginTop:25,
         alignItems:'center'
     }
 })

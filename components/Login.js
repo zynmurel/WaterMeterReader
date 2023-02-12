@@ -6,7 +6,7 @@ import { useNavigation } from '@react-navigation/native';
 import http from '../Hooks/LoginManager';
 import AsyncStorage from '@react-native-async-storage/async-storage'
 
-const Login = () => {
+const Login = ({setIsLogin}) => {
     const [ email ,setEmail ] = useState('')
     const [ password ,setPassword ] = useState('')
     const [eye, setEye] = useState(true)
@@ -32,7 +32,7 @@ const Login = () => {
     useEffect(()=>{
       const getToken = async () => {
         const token = await AsyncStorage.getItem("user_token")
-        token && navigation.navigate("Home")
+        token && setIsLogin(true)
       }
       getToken()
     },)
@@ -74,7 +74,7 @@ const Login = () => {
         storeDataAsyncStorage("user_email",res.data.data.user.email)
         storeDataAsyncStorage("user_id",res.data.data.user.user_id.toString())
       }
-      navigation.navigate("Home")
+      setIsLogin(true)
     }).catch((err)=>{
       Alert.alert("Login Error!", err.response.data.message,[
         {text:"Undestood", onPress: ()=> {console.log("Maui")}}
