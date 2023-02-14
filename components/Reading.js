@@ -9,8 +9,11 @@ import ConsumerList from "./HomeComponents/ConsumerList";
 import SettingModal from "./HomeComponents/BrgyPrkSettingsModal";
 import ConfirmRemoveModal from "./HomeComponents/ConfirmRemoveModal";
 import {LinearGradient} from 'expo-linear-gradient'
+import * as SQLite from 'expo-sqlite';
+
 
 const Reading = ({reloadHome, setReloadHome}) => {
+    const db = SQLite.openDatabase("ready.db");
     const [searched, setSearched] = useState('')
     const navigation = useNavigation()
     const [openSettings, setOpenSettings] = useState(false)
@@ -23,6 +26,44 @@ const Reading = ({reloadHome, setReloadHome}) => {
     }
     const route = useRoute();
     const { item} = route.params;
+    
+    const [filteredConsumers, setFilteredConsumers] = useState([])
+    useEffect(()=>{
+        const getData = (db) => {
+            return new Promise((resolve, reject) => {
+              db.transaction(tx => {
+                tx.executeSql(
+                `SELECT * FROM ${item.name};`,
+                  [],
+                  (_, results) => {
+                    const rows = results.rows._array;
+                    resolve(rows);
+                  },
+                  (_, error) => reject(error)
+                );
+              });
+            });
+          };
+          
+          const showData = async () => {
+            try {
+              const data = await getData(db);
+              setFilteredConsumers(data)
+            } catch (error) {
+              console.error(error);
+            }
+          };
+          showData();
+
+    },[searched, reloadHome])
+
+    const filtered = filteredConsumers.filter((dt)=>{
+        const name = `${dt.first_name} ${dt.last_name} ${dt.middle_name} ${dt.consumer_id}`.toLowerCase() 
+        if(name.toLowerCase().includes(searched.toLowerCase()) && dt.reading_latest===null){
+            return dt
+        }
+})
+
     const styles = StyleSheet.create({
         readingcontainer:{
             backgroundColor:'white',
@@ -98,7 +139,7 @@ const Reading = ({reloadHome, setReloadHome}) => {
     // console.log(filteredConsumers)
     return ( 
         <View style={styles.readingcontainer}>
-        <StatusBar style='dark'/>
+        <StatusBar style='light'/>
         <View style={styles.nav}>
             <View style={{ flexDirection:'row', justifyContent:'space-between', alignItems:'center' }}>
             <TouchableOpacity style={styles.back} 
@@ -130,9 +171,14 @@ const Reading = ({reloadHome, setReloadHome}) => {
             setSearched={setSearched}
             />
             <ConsumerList
+            filteredConsumers={filteredConsumers}
+            setFilteredConsumers={setFilteredConsumers}
+            barangayName={item.name}
+            reloadHome={reloadHome}
+            setReloadHome={setReloadHome}
             totalConsumer={item.totalConsumer}
             totalReaded = {item.totalReaded}
-            data={item.data}
+            data={filtered}
             searched={searched}
             />
             </View>

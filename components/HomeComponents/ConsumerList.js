@@ -1,20 +1,47 @@
-import { StyleSheet, View, FlatList, Text, TouchableOpacity } from "react-native";
+import { StyleSheet, View, FlatList, Text, TouchableOpacity, Button } from "react-native";
 import {LinearGradient} from 'expo-linear-gradient'
 import { useEffect, useState } from "react";
 import { useNavigation } from "@react-navigation/native";
 
-const ConsumerList = ({data, searched, totalConsumer, totalReaded}) => {
+const ConsumerList = ({data, searched, totalConsumer, totalReaded, reloadHome, barangayName, setReloadHome, filteredConsumers,setFilteredConsumers}) => {
+    const [reload, setReload] = useState(false);
     const navigation = useNavigation()
-    const [filteredConsumers, setFilteredConsumers] = useState(data)
-    useEffect(()=>{
-        const sample = data.filter((dt)=>{
-            const name = `${dt.first_name} ${dt.last_name} ${dt.middle_name} ${dt.consumer_id}`.toLowerCase() 
-            if(name.toLowerCase().includes(searched.toLowerCase())){
-                return dt
-            }
-    })
-        setFilteredConsumers(sample)
-    },[searched])
+    // const [filteredConsumers, setFilteredConsumers] = useState(data)
+    // useEffect(()=>{
+    //     const getData = (db) => {
+    //         return new Promise((resolve, reject) => {
+    //           db.transaction(tx => {
+    //             tx.executeSql(
+    //             `SELECT * FROM ${barangayName};`,
+    //               [],
+    //               (_, results) => {
+    //                 const rows = results.rows._array;
+    //                 resolve(rows);
+    //               },
+    //               (_, error) => reject(error)
+    //             );
+    //           });
+    //         });
+    //       };
+          
+    //       const showData = async () => {
+    //         try {
+    //           const data = await getData(db);
+    //           setFilteredConsumers(data)
+    //           const sample = filteredConsumers.filter((dt)=>{
+    //               const name = `${dt.first_name} ${dt.last_name} ${dt.middle_name} ${dt.consumer_id}`.toLowerCase() 
+    //               if(name.toLowerCase().includes(searched.toLowerCase()) && dt.reading_latest===null){
+    //                   return dt
+    //               }
+    //       })
+    //           setFilteredConsumers(sample)
+    //         } catch (error) {
+    //           console.error(error);
+    //         }
+    //       };
+    //       showData();
+
+    // },[searched, reloadHome])
 
 
     const styles = StyleSheet.create({
@@ -71,7 +98,6 @@ const ConsumerList = ({data, searched, totalConsumer, totalReaded}) => {
         <TouchableOpacity
         onPress={()=>{
             navigation.navigate("ConsumerPage", {item})
-            console.log(item)
         }}
         >
         <LinearGradient colors={['white', 'white', 'white']} style={styles.eachConsumer}>
@@ -84,13 +110,13 @@ const ConsumerList = ({data, searched, totalConsumer, totalReaded}) => {
     return ( 
         <>
         <View style={styles.toreadcontainer}>
-        <Text style={styles.toreadtext}>Readed : {totalReaded} / {totalConsumer}</Text>
+        <Text style={styles.toreadtext}>Readed : {totalConsumer- data.length} / {totalConsumer}</Text>
         </View>
         <LinearGradient colors={['white', '#DADADA']} style={styles.consumerlist}>
             {filteredConsumers.length!==0 &&
             <FlatList
                     style={{ width:'100%', height:'100%' }}
-                    data={filteredConsumers.sort(function(a, b){return a.consumer_id - b.consumer_id})}
+                    data={data}
                     renderItem={({item}) => {
                         return eachConsumer(item)
                     }}

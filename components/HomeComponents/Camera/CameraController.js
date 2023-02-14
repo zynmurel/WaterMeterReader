@@ -1,20 +1,17 @@
-import { View, Image, TouchableOpacity, Text } from "react-native";
+import { View, Image, TouchableOpacity, Text, Modal } from "react-native";
 import { Camera } from "expo-camera";
 import { Entypo, Ionicons } from '@expo/vector-icons';
 import { CameraType } from "expo-camera";
 import * as MediaLibrary from 'expo-media-library'
 import { StyleSheet } from "react-native";
-import React , { useState, useEffect, useRef } from "react";
+import React , { useState, useEffect } from "react";
 import CameraButton from "./CameraButton";
 import { useNavigation } from "@react-navigation/native";
-import * as ImageManipulator from 'expo-image-manipulator';
 
-const CameraController = () => {
+const CameraController = ({openCam, setOpenCam, image, setImage, cameraRef, imageBase64, setImageBase64}) => {
     const [hasCameraPermission, setHasCameraPermission] = useState(null)
-    const [image, setImage] = useState(null)
     const [type, setType] = useState(Camera.Constants.Type.back)
     const [flash, setFlash] = useState(Camera.Constants.FlashMode.off)
-    const cameraRef = useRef(null)
     const navigation = useNavigation()
 
     useEffect(()=>{
@@ -29,15 +26,14 @@ const CameraController = () => {
             flex:1,
             backgroundColor:'black',
             backgroundColor:'rgb(12,20,52)',
-            paddingTop:28
         },
         camera:{
-            height:550,
+            height:480,
             borderWidth:1,
             borderColor:'white'
         },
         buttonContainerTop:{
-            height:50,
+            height:70,
             justifyContent:'center',
             alignItems:'center',
             paddingHorizontal:15,
@@ -45,20 +41,32 @@ const CameraController = () => {
             justifyContent:'space-between'
         },
         buttonContainerBottom:{
-            height:70,
+            height:100,
             justifyContent:'center'
         },
     })
     const takeAPhoto= async()=>{
-        if(cameraRef){
-            try{
-                const data = await cameraRef.current.takePictureAsync();
-                console.log(data)
-                setImage(data.uri)
-            } catch(e){
-            console.log(e)
-        }
-    }}
+    //     if(cameraRef){
+    //         try{
+    //             const data = await cameraRef.current.takePictureAsync();
+    //             console.log(data)
+    //             setImage(data.uri)
+    //         } catch(e){
+    //         console.log(e)
+    //     }
+    // }
+    if (cameraRef.current) {
+        const options = {
+          quality: 0.1,
+          pictureSize: '240x240',
+          base64:true,
+        };
+        const data = await cameraRef.current.takePictureAsync(options);
+        const base64 = data.base64;
+        setImage(data.uri);
+        setImageBase64(base64)
+      }
+}
 
     const savePhoto = async () => {
         if(image){
@@ -75,10 +83,17 @@ const CameraController = () => {
         return <Text>You have no access to the camera</Text>
     }
     return ( 
-        <View style={styles.container}>
+        <Modal
+        animationType='slide'
+        transparent={true}
+        visible={openCam}
+        onRequestClose={() => {
+            setOpenCam(!openCam);
+            }}>
+            <View style={styles.container}>
         <View style={styles.buttonContainerTop}>
                 <TouchableOpacity onPress={()=>{
-                    navigation.goBack()
+                    setOpenCam(false)
                 }}
                 style={{ marginRight:10 }}
                 >
@@ -92,13 +107,13 @@ const CameraController = () => {
                     <Ionicons name={"flash-sharp"} size={22} color={flash === Camera.Constants.FlashMode.off?"gray":"orange"}/>
                 </TouchableOpacity>
         </View>
-            {!image ?<Camera
+            {!image ?
+            <Camera
             style={styles.camera}
             type={type}
             flashMode={flash}
             ref={cameraRef}
             >
-                <Text>Hello</Text>
             </Camera>:
             <Image source={{ uri:image }} style={styles.camera}/>
             }
@@ -108,10 +123,13 @@ const CameraController = () => {
                 style={{ 
                     flexDirection:'row',
                     justifyContent:'space-between',
-                    paddingHorizontal:50
+                    paddingHorizontal:30
                  }}>
                 <CameraButton title={"Re-take"} icon={"refresh-circle"} color={"orange"} onPress={()=>setImage(null)}/>
-                <CameraButton title={"Save"} icon={"checkmark-circle"} color={"rgba(0, 180, 4, 1)"} onPress={savePhoto}/>
+                <CameraButton title={"Done"} icon={"checkmark-circle"} color={"rgba(0, 180, 4, 1)"} 
+                onPress={()=>{
+                    setOpenCam(false)
+                    }}/>
                 </View>
                 :
                 <View style={{ justifyContent:'center', alignItems:'center' }}>
@@ -120,6 +138,7 @@ const CameraController = () => {
                     }
             </View>
         </View>
+        </Modal>
      );
 }
  

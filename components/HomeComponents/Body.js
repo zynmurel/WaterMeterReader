@@ -33,7 +33,8 @@ const Body = ({db, data:generated, setReloadGenerated, reloadGenerated}) => {
         body:{
             flex:8,
             width:'100%',
-            alignItems:'center'
+            alignItems:'center',
+            backgroundColor:'rgba(247, 247, 247, 1)',
         },
         purokbarangay:{
             flexDirection:'row',

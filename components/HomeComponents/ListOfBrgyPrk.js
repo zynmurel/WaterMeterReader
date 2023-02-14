@@ -10,7 +10,7 @@ const ListOfBrgyPrk = ({generated, db, reloadGenerated, setReloadGenerated}) => 
             width:'90%',
         },
         toread:{
-            backgroundColor:'rgba(52, 53, 65, 1)',
+            backgroundColor:'white',
             width:'100%',
             height:380,
             paddingHorizontal:10,
@@ -37,16 +37,16 @@ const ListOfBrgyPrk = ({generated, db, reloadGenerated, setReloadGenerated}) => 
                 width: 0.1,
                 height: -0.1, },
             backgroundColor: 'white',
-            borderRadius: 2,
-            borderWidth:1,
-            borderColor:'rgba(218, 218, 218, 1)'
+            borderRadius: 5,
         },
         onebrgyprktext:{
             fontSize:19,
-            fontWeight:'bold'
+            fontWeight:'bold',
+            color:'white'
         },
         onebrgyprktext2:{
             fontSize:16,
+            color:'white'
         },
         nogenerated:{
             justifyContent:'center',
@@ -71,13 +71,12 @@ const ListOfBrgyPrk = ({generated, db, reloadGenerated, setReloadGenerated}) => 
                     //     );
                     //   });
                     //   setReloadGenerated(reloadGenerated?false:true)
-                    console.log(item)
                     navigation.navigate("Reading", {item})
              }}>
-             <LinearGradient colors={['white', 'white', '#F9F2E6']} style={styles.onebrgyprk}>
+             <LinearGradient colors={['rgb(12,20,52)', '#1E2643', '#303A61']} style={styles.onebrgyprk}>
                 <Text style={styles.onebrgyprktext}>{barangay}</Text>
                 <Text style={styles.onebrgyprktext2}>{`Purok ${purok}`}</Text>
-                <Text style={styles.onebrgyprktext2}>{`Readed : ${totalReaded}/${totalConsumer}`}</Text>
+                <Text style={styles.onebrgyprktext2}>{`Read : ${totalReaded}/${totalConsumer}`}</Text>
 
             </LinearGradient>
             </TouchableOpacity>

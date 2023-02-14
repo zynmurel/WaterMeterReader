@@ -4,7 +4,6 @@ import { Ionicons, Entypo } from '@expo/vector-icons';
 const CameraButton = ({title, icon, onPress, color}) => {
     const styles = StyleSheet.create({
         button:{
-            height:40,
             alignItems:'center',
             flexDirection:'row',
             justifyContent:'center',
@@ -15,15 +14,15 @@ const CameraButton = ({title, icon, onPress, color}) => {
             backgroundColor:'rgb(40,48,90)',
         },
         text:{
-            fontWeight:'bold',
-            fontSize:16,
+            fontSize:18,
             color:'#f1f1f1',
-            marginLeft:10
+            marginLeft:10,
+            marginRight:5
         }
     })
     return ( 
         <TouchableOpacity onPress={onPress} style={styles.button}>
-            <Ionicons name={icon} size={28} color={color?color:'#f1f1f1'}/>
+            <Ionicons name={icon} size={35} color={color?color:'#f1f1f1'}/>
             <Text style={styles.text}>{title}</Text>
         </TouchableOpacity>
      );

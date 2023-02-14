@@ -50,9 +50,6 @@ export default function App() {
               <Stack.Screen name='ConsumerPage'>
                 {props => <ConsumerPage {...props} reloadHome={reloadHome} setReloadHome={setReloadHome} />}
               </Stack.Screen>
-              <Stack.Screen name='Camera'>
-                {props => <CameraController {...props} setIsLogin={setIsLogin} reloadHome={reloadHome} setReloadHome={setReloadHome}/>}
-              </Stack.Screen>
 
               </>}
             </Stack.Group>

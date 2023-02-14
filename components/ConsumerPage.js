@@ -3,11 +3,11 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from "@react-navigation/native";
 import { useState } from "react";
 import ConsumerMeter from "./HomeComponents/ConsumerMeter";
-const ConsumerPage = ({route}) => {
+const ConsumerPage = ({route, reloadHome, setReloadHome}) => {
     const back = () => {
         navigation.goBack()
     }
-    const { item} = route.params;
+    const { item } = route.params;
     const [reading, setReading] = useState(item.present_reading===""?0:item.present_reading)
     const navigation = useNavigation()
     const styles = StyleSheet.create({
@@ -98,9 +98,12 @@ const ConsumerPage = ({route}) => {
 
                 </View>
                 <ConsumerMeter
+                data={item}
                 previousReading = { item.present_reading===""?0:item.present_reading}
                 reading={reading}
                 setReading={setReading}
+                reloadHome={reloadHome}
+                setReloadHome={setReloadHome}
                 />
 
             </View>

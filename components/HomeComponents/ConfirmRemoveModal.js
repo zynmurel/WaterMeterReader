@@ -3,6 +3,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from "@react-navigation/native";
 import * as SQLite from 'expo-sqlite'
 import {LinearGradient} from 'expo-linear-gradient'
+import { useState } from "react";
 const ConfirmRemoveModal = ({
     areadata,
     openSettings,

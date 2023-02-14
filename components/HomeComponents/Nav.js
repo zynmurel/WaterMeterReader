@@ -1,18 +1,8 @@
 import { StyleSheet, View, Text, TouchableOpacity } from "react-native";
 import Ionicons from '@expo/vector-icons/Ionicons'
-import AsyncStorage from '@react-native-async-storage/async-storage'
 import {useNavigation} from '@react-navigation/native'
 
-const Nav = ({setIsLogin}) => {
-    const pressPerson = async() => {
-         AsyncStorage.setItem("user_type","")
-         AsyncStorage.setItem("user_token","")
-         AsyncStorage.setItem("user_email","")
-         AsyncStorage.setItem("user_id","")
-          setIsLogin(false)
-          const token = await AsyncStorage.getItem("user_token")
-          console.log(token)
-    }
+const Nav = ({setIsLogin, setOpenProfile, openProfile}) => {
     return ( 
         <>
             <View style={styles.nav}>
@@ -23,7 +13,7 @@ const Nav = ({setIsLogin}) => {
                         <Text style={styles.text2}>WATERWORKS</Text>
                     </View>
                 </View>
-                <TouchableOpacity style={styles.reader} onPress={pressPerson}>
+                <TouchableOpacity style={styles.reader} onPress={()=> setOpenProfile(true)}>
                     <Ionicons name={"person"} color="rgb(12,30,50)" size={25}/>
                 </TouchableOpacity>
             </View>

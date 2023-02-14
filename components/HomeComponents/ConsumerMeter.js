@@ -1,18 +1,32 @@
-import { StyleSheet, View, Text, TouchableOpacity } from "react-native";
+import { StyleSheet, View, Text, TouchableOpacity, Image, Modal } from "react-native";
 import {LinearGradient} from 'expo-linear-gradient'
-import { Ionicons } from '@expo/vector-icons';
-import { useState } from "react";
+import { Ionicons, Entypo } from '@expo/vector-icons';
+import { useState, useRef } from "react";
 import { useNavigation } from "@react-navigation/native";
+import CameraController from "./Camera/CameraController";
+import * as SQLite from 'expo-sqlite'
 
 
 const ConsumerMeter = ({
+    data,
     reading,
     setReading,
-    previousReading
+    previousReading,
+    reloadHome,
+    setReloadHome,
+    generated
 }) => {
+    const [openCam, setOpenCam]=useState(false)
+    const [viewPhoto, setViewPhoto]=useState(false)
+    const [image, setImage] = useState(null)
+    const [imageBase64, setImageBase64] = useState("")
+    const cameraRef = useRef(null)
     const navigation = useNavigation()
     const [plus, setPlus] = useState(1)
     const [disableSubtract, setDisableSubtract] = useState(true)
+    const db = SQLite.openDatabase("ready.db")
+    let paddedPresentReading = reading.toString().padStart(5, "0").split("");
+    let paddedPreviousReading = previousReading.toString().padStart(5, "0").split("");
     const addCubicMeter = () => {
         setReading(reading+plus)
         setDisableSubtract(false)
@@ -27,8 +41,22 @@ const ConsumerMeter = ({
             setDisableSubtract(true)
         }
     }
-    let paddedPresentReading = reading.toString().padStart(5, "0").split("");
-    let paddedPreviousReading = previousReading.toString().padStart(5, "0").split("");
+    const submitReading =  ( consumer_id, reading_latest, reading_img, table) => {
+       
+            db.transaction(tx => {
+                tx.executeSql(
+                  `UPDATE ${table} SET reading_latest = ?, reading_img = ? WHERE consumer_id = ?;`,
+                  [reading_latest, reading_img, consumer_id],
+                  (tx, results) => {
+                    console.log('Results', results.rowsAffected);
+                  },
+                  (error) => {
+                    console.log('Error', error);
+                  }
+                );
+              });
+        
+      };
     const styles = StyleSheet.create({
         meter:{
             width:'100%',
@@ -110,12 +138,14 @@ const ConsumerMeter = ({
             borderColor:'white',
         },
         prsntdigitcontainer:{
-            paddingHorizontal:10,
+            alignItems:'center',
+            justifyContent:'center',
             paddingVertical:0,
             margin:3,
             marginHorizontal:3,
             borderRadius:2,
             backgroundColor:'white',
+            width:35
         },
         prsntdigit:{
             fontSize:30,
@@ -125,7 +155,7 @@ const ConsumerMeter = ({
         mcubeprsnt:{
             position:'absolute',
             fontSize:20,
-            right:10,
+            right:20,
             top:20,
             fontWeight:'bold',
             color:'rgba(40, 42, 77, 1)',
@@ -201,11 +231,10 @@ const ConsumerMeter = ({
         },
         camcontroller:{
             flexDirection:'row',
-            margin:20,
+            margin:5,
         },
         cam:{
             flexDirection:'column',
-            justifyContent:'center',
             alignItems:'center',
             flex:1
         },
@@ -214,6 +243,49 @@ const ConsumerMeter = ({
             fontWeight:'bold',
             fontSize:13,
             color:'rgba(45, 45, 45, 1)'
+        },
+        camera:{
+            borderWidth:1,
+            borderColor:"#39E145",
+            height:80,
+            width:80,
+            borderRadius:5,
+            borderStyle:'dashed',
+            justifyContent:'center', 
+            alignItems:'center'
+        },
+        photo:{
+            borderWidth:1,
+            borderColor:"white",
+            height:400,
+            width:300,
+            borderRadius:5,
+            borderStyle:'dashed',
+            justifyContent:'center', 
+            alignItems:'center'
+        },
+        submit:{
+            padding:10,
+            paddingHorizontal:30,
+            margin:30,
+            backgroundColor:'green',
+            borderRadius:10,
+            flexDirection:'row',
+            alignItems:'center',
+            justifyContent:'center',
+            elevation: 2,
+            shadowColor: 'black',
+            shadowOpacity: 0.1,
+            shadowRadius: 6,
+            shadowOffset: { 
+                width: 0.9,
+                height: -0.9, },
+        },
+        submitText:{
+            fontSize:18,
+            marginHorizontal:5,
+            color:'white',
+            fontWeight:'bold'
         }
     })
     return ( 
@@ -253,11 +325,13 @@ const ConsumerMeter = ({
 
                     <View style={styles.controller}>
                         <TouchableOpacity style={styles.minus} onPress={subtractCubicMeter}  disabled={disableSubtract}>
-                            <LinearGradient colors={disableSubtract?['rgba(218, 218, 218, 1)','rgba(186, 186, 186, 1)']:['rgba(255, 213, 130, 1)', 'rgba(255, 192, 66, 1)', 'rgba(255, 170, 0, 1)']} style={{borderRadius:6}}>
+                            <LinearGradient colors={disableSubtract?['rgba(218, 218, 218, 1)','rgba(186, 186, 186, .5)']:['rgba(255, 213, 130, 1)', 'rgba(255, 192, 66, 1)', 'rgba(255, 170, 0, 1)']} style={{borderRadius:6}}>
                                 <Ionicons name="remove-outline" size={30} color={"white"} style={{ margin:5 }} />
                             </LinearGradient>
                         </TouchableOpacity>
-                        <TouchableOpacity style={styles.plus} onPress={addCubicMeter}>
+                        <TouchableOpacity style={styles.plus} onPress={()=>{
+                            addCubicMeter()
+                        }}>
                             <LinearGradient colors={['rgba(255, 213, 130, 1)', 'rgba(255, 192, 66, 1)', 'rgba(255, 170, 0, 1)']} style={{borderRadius:6}}>
                                 <Ionicons name="add-outline" size={30} color={"white"} style={{ margin:5 }}/>
                             </LinearGradient>
@@ -267,32 +341,73 @@ const ConsumerMeter = ({
                 </View>
                             <Text style={styles.prsnttext}>Proof of Reading</Text>
                 <View style={styles.presentContainer}>
-                    <View style={styles.presentReading}>
-                    </View>
 
-                    <View style={styles.camcontroller}>
+                    <View style={{ ...styles.camcontroller }}>
                         <View style={styles.cam}>
-                            <Text style={styles.camtext}>Take a Photo</Text>
-                            <TouchableOpacity onPress={()=>navigation.navigate("Camera")} style={styles.camiconcontainer}>
+                            <Text style={styles.camtext}>{image?"Re-take" : "Take a Photo"}</Text>
+                            <TouchableOpacity 
+                            onPress={()=>{
+                                setImage(null)
+                                setOpenCam(true)
+                                }} style={styles.camiconcontainer}>
                                 <LinearGradient colors={['rgba(255, 213, 130, 1)', 'rgba(255, 192, 66, 1)', 'rgba(255, 170, 0, 1)']} style={styles.camicon}>
-                                    <Ionicons name="camera-outline" size={30} color={"white"} />
+                                    <Ionicons name={image?"camera-reverse-outline":"camera-outline"} size={40} color={"white"} />
                                 </LinearGradient>
                             </TouchableOpacity>
                         </View>
                         <View style={styles.cam}>
-                            <Text>Take a Photo</Text>
-                            <TouchableOpacity onPress={subtractCubicMeter} style={styles.camiconcontainer}>
-                                <LinearGradient colors={['rgba(255, 213, 130, 1)', 'rgba(255, 192, 66, 1)', 'rgba(255, 170, 0, 1)']} style={styles.camicon}>
-                                    <Ionicons name="camera-outline" size={30} color={"white"} />
-                                </LinearGradient>
+                            <Text style={styles.camtext}>View Photo</Text>
+                            <TouchableOpacity onPress={subtractCubicMeter} style={styles.camiconcontainer} disabled={image?false:true}>
+                                {image ? 
+                                <TouchableOpacity onPress={()=>setViewPhoto(true)}>
+                                    <Image source={{ uri:image }} style={styles.camera}/>
+                                </TouchableOpacity>
+                                : 
+                                <View style={{ ...styles.camera, borderColor:'gray' }}>
+                                    <Text style={{ color:'gray', textAlign:'center' }}>Take a photo</Text>
+                                </View>}
                             </TouchableOpacity>
                         </View>
                     </View>
                 </View>
+                <TouchableOpacity 
+                onPress={()=>{
+                    submitReading(data.consumer_id, reading, imageBase64, `read${data.barangay.replace(" ", "")}${data.purok}`);
+                    setReloadHome(!reloadHome)
+                    navigation.goBack()
+                }}
+                disabled={disableSubtract || !image? true:false}
+                >    
+                <LinearGradient colors={disableSubtract || !image?['rgba(218, 218, 218, 1)','rgba(186, 186, 186, 1)']:['#00CA00', '#009A00', '#007C00']} style={styles.submit}> 
+                    <Entypo name={"export"} size={25} color={"white"} />
+                    <Text style={styles.submitText}>Submit</Text>
+                </LinearGradient>
+                </TouchableOpacity>
                 
-            <View style={styles.camera}>
-
-            </View>
+            <CameraController
+            openCam={openCam}
+            setOpenCam={setOpenCam}
+            image={image}
+            setImage={setImage}
+            cameraRef={cameraRef}
+            imageBase64={imageBase64}
+            setImageBase64={setImageBase64}
+            />
+            <Modal
+            animationType='slide'
+            transparent={true}
+            visible={viewPhoto}
+            onRequestClose={() => {
+                setViewPhoto(!viewPhoto);
+                }}
+            >
+                <View style={{ alignItems:'center', justifyContent:'center', flex:1, backgroundColor:'rgba(0,0,0,.8)' }}>
+                    <Image source={{ uri:image }} style={styles.photo}/>
+                    <TouchableOpacity style={{ margin:10 }} onPress={()=>setViewPhoto(false)}>
+                        <Ionicons name={"close-circle-outline"} size={40} color={"white"} />
+                    </TouchableOpacity>
+                </View>
+            </Modal>
 
         </View>
      );
