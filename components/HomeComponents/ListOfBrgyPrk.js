@@ -85,7 +85,7 @@ const ListOfBrgyPrk = ({generated, db, reloadGenerated, setReloadGenerated}) => 
     return ( 
         <View style={styles.container}>
             <Text style={styles.text1}>
-                Generated Barangay  :  {generated.length}/5
+                Generated Barangay  :  {generated.length}/10
             </Text>
             
             <View style={styles.toread}>    

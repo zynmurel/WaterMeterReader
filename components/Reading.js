@@ -57,12 +57,18 @@ const Reading = ({reloadHome, setReloadHome}) => {
 
     },[searched, reloadHome])
 
-    const filtered = filteredConsumers.filter((dt)=>{
+    const unreadConsumers = filteredConsumers.filter((dt)=>{
         const name = `${dt.first_name} ${dt.last_name} ${dt.middle_name} ${dt.consumer_id}`.toLowerCase() 
         if(name.toLowerCase().includes(searched.toLowerCase()) && dt.reading_latest===null){
             return dt
         }
-})
+    })
+    const readConsumers = filteredConsumers.filter((dt)=>{
+        if(dt.reading_latest!==null){
+            return dt
+        }
+    })
+
 
     const styles = StyleSheet.create({
         readingcontainer:{
@@ -122,21 +128,6 @@ const Reading = ({reloadHome, setReloadHome}) => {
              fontWeight:'bold'
         },
     })
-    // useEffect(()=>{
-    // const filteredSearch = () => {
-    //     return item.data.filter((dt)=>{
-    //         const name = `${dt.first_name} ${dt.last_name} ${dt.middle_name} ${dt.consumer_id}`.toLowerCase()
-            
-    //             if(name.includes(searched)){
-    //                 return dt
-    //             }
-            
-    //     })
-    // }
-    // console.log(filteredSearch())
-    // setFilteredConsumers(filteredSearch())
-    // },[])
-    // console.log(filteredConsumers)
     return ( 
         <View style={styles.readingcontainer}>
         <StatusBar style='light'/>
@@ -174,12 +165,15 @@ const Reading = ({reloadHome, setReloadHome}) => {
             filteredConsumers={filteredConsumers}
             setFilteredConsumers={setFilteredConsumers}
             barangayName={item.name}
+            barangay = {item.barangay}
+            purok = {item.purok}
             reloadHome={reloadHome}
             setReloadHome={setReloadHome}
             totalConsumer={item.totalConsumer}
             totalReaded = {item.totalReaded}
-            data={filtered}
+            data={unreadConsumers}
             searched={searched}
+            areadata ={{ name:item.name, barangay:item.barangay, purok:item.purok }}
             />
             </View>
             <SettingModal
@@ -188,6 +182,8 @@ const Reading = ({reloadHome, setReloadHome}) => {
             setOpenSettings={setOpenSettings}
             openConfirm={openConfirm}
             setOpenConfirm={setOpenConfirm}
+            readConsumers={readConsumers}
+            totalConsumer={item.totalConsumer}
             />
             <ConfirmRemoveModal
             areadata ={{ name:item.name, barangay:item.barangay, purok:item.purok }}

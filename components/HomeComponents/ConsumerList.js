@@ -2,46 +2,12 @@ import { StyleSheet, View, FlatList, Text, TouchableOpacity, Button } from "reac
 import {LinearGradient} from 'expo-linear-gradient'
 import { useEffect, useState } from "react";
 import { useNavigation } from "@react-navigation/native";
+import { Ionicons } from '@expo/vector-icons';
 
-const ConsumerList = ({data, searched, totalConsumer, totalReaded, reloadHome, barangayName, setReloadHome, filteredConsumers,setFilteredConsumers}) => {
+const ConsumerList = ({data, searched, totalConsumer, totalReaded, reloadHome, barangayName, setReloadHome, filteredConsumers, barangay, purok, areadata}) => {
     const [reload, setReload] = useState(false);
     const navigation = useNavigation()
-    // const [filteredConsumers, setFilteredConsumers] = useState(data)
-    // useEffect(()=>{
-    //     const getData = (db) => {
-    //         return new Promise((resolve, reject) => {
-    //           db.transaction(tx => {
-    //             tx.executeSql(
-    //             `SELECT * FROM ${barangayName};`,
-    //               [],
-    //               (_, results) => {
-    //                 const rows = results.rows._array;
-    //                 resolve(rows);
-    //               },
-    //               (_, error) => reject(error)
-    //             );
-    //           });
-    //         });
-    //       };
-          
-    //       const showData = async () => {
-    //         try {
-    //           const data = await getData(db);
-    //           setFilteredConsumers(data)
-    //           const sample = filteredConsumers.filter((dt)=>{
-    //               const name = `${dt.first_name} ${dt.last_name} ${dt.middle_name} ${dt.consumer_id}`.toLowerCase() 
-    //               if(name.toLowerCase().includes(searched.toLowerCase()) && dt.reading_latest===null){
-    //                   return dt
-    //               }
-    //       })
-    //           setFilteredConsumers(sample)
-    //         } catch (error) {
-    //           console.error(error);
-    //         }
-    //       };
-    //       showData();
-
-    // },[searched, reloadHome])
+    console.log(filteredConsumers.length)
 
 
     const styles = StyleSheet.create({
@@ -81,7 +47,7 @@ const ConsumerList = ({data, searched, totalConsumer, totalReaded, reloadHome, b
             paddingVertical:5,
             fontSize:15,
             width:'auto',
-            backgroundColor:'#00AE00',
+            backgroundColor:'#D89700',
             color:'white',
             borderRadius:4,
             borderTopRightRadius:50,
@@ -89,8 +55,9 @@ const ConsumerList = ({data, searched, totalConsumer, totalReaded, reloadHome, b
         },
         warn:{
             color:'gray',
-            marginTop:200,
-            fontSize:15
+            marginTop:140,
+            fontSize:16,
+            textAlign:'center',
         }
     })
     const eachConsumer = (item) => {
@@ -110,10 +77,10 @@ const ConsumerList = ({data, searched, totalConsumer, totalReaded, reloadHome, b
     return ( 
         <>
         <View style={styles.toreadcontainer}>
-        <Text style={styles.toreadtext}>Readed : {totalConsumer- data.length} / {totalConsumer}</Text>
+        <Text style={styles.toreadtext}>Read : {totalConsumer - data.length} / {totalConsumer}</Text>
         </View>
         <LinearGradient colors={['white', '#DADADA']} style={styles.consumerlist}>
-            {filteredConsumers.length!==0 &&
+            {data.length!==0 &&
             <FlatList
                     style={{ width:'100%', height:'100%' }}
                     data={data}
@@ -122,8 +89,35 @@ const ConsumerList = ({data, searched, totalConsumer, totalReaded, reloadHome, b
                     }}
                     keyExtractor={item => item.consumer_id}
                 />}
-            {filteredConsumers.length===0 &&
+            {data.length===0 && searched!=="" &&
+            <>
             <Text style={styles.warn}>No consumer ID/Name includes this text</Text>
+            </>
+            }
+            {data.length===0 && searched==="" &&
+            <>
+            <Text style={styles.warn}>No Consumer to Read in {barangay} Purok {purok}</Text>
+            <TouchableOpacity style={{ flexDirection:'row', alignItems:'center', justifyContent:'center', borderRadius:5, margin:20, marginHorizontal:30 }}
+            onPress={()=> 
+                navigation.navigate("ReadConsumers", { areadata})}
+                >
+                <LinearGradient colors={['#3A4994', '#4B589E', '#4B589E']} style={{ width:'100%', borderRadius:20, justifyContent:'center',flexDirection:'row', alignItems:'center',
+            elevation: 1,
+            shadowColor: 'black',
+            shadowOpacity: 0.26,
+            shadowRadius: 6,
+            shadowOffset: { 
+                width: 0.1,
+                height: -0.1, },
+                borderWidth:1,
+                borderColor:'#9FA5C3' }}>
+                                    <Text style={{  color:'white', fontWeight:'bold', fontSize:16, marginHorizontal:40, textAlign:'center', marginVertical:10 }}>
+                                        Read Consumer/s
+                                    </Text>
+                                    <Ionicons name="arrow-forward" color={"#9FA5C3"} size={25} style={{ marginTop:3 }}  />
+                                </LinearGradient>
+            </TouchableOpacity>
+            </>
             }
         </LinearGradient>
         </>

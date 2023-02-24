@@ -4,10 +4,13 @@ import { Ionicons, Entypo } from '@expo/vector-icons';
 import { useState, useRef } from "react";
 import { useNavigation } from "@react-navigation/native";
 import CameraController from "./Camera/CameraController";
+import SelectDropdown from 'react-native-select-dropdown'
 import * as SQLite from 'expo-sqlite'
 
 
 const ConsumerMeter = ({
+    cubicMeters,
+    item,
     data,
     reading,
     setReading,
@@ -16,6 +19,7 @@ const ConsumerMeter = ({
     setReloadHome,
     generated
 }) => {
+    const plusValues = [1,2,5]
     const [openCam, setOpenCam]=useState(false)
     const [viewPhoto, setViewPhoto]=useState(false)
     const [image, setImage] = useState(null)
@@ -24,12 +28,70 @@ const ConsumerMeter = ({
     const navigation = useNavigation()
     const [plus, setPlus] = useState(1)
     const [disableSubtract, setDisableSubtract] = useState(true)
+    const [openConfirmSubmit, setOpenConfirmSubmit] = useState(false)
     const db = SQLite.openDatabase("ready.db")
     let paddedPresentReading = reading.toString().padStart(5, "0").split("");
     let paddedPreviousReading = previousReading.toString().padStart(5, "0").split("");
+    let pressableminus = false
+    let present_bill = 0
+    const totalReading = (reading - (previousReading===""?0:previousReading))
+    if(cubicMeters.length!==0){
+        if(item.usage_type.toLowerCase()==="residential"){
+            if(totalReading <=cubicMeters[0].max_cubic){
+    
+                present_bill=cubicMeters[0].fixed_rate
+    
+            }else if(totalReading>=cubicMeters[1].min_cubic && totalReading<=cubicMeters[1].max_cubic){
+    
+                present_bill = totalReading * cubicMeters[1].cubic_rate
+    
+            }else if(totalReading>=cubicMeters[2].min_cubic && totalReading<=cubicMeters[2].max_cubic){
+    
+                present_bill = totalReading * cubicMeters[2].cubic_rate
+    
+            }else if(totalReading>=cubicMeters[3].min_cubic && totalReading<=cubicMeters[3].max_cubic){
+    
+                present_bill = totalReading * cubicMeters[3].cubic_rate
+    
+            }else if(totalReading>=cubicMeters[4].min_cubic){
+    
+                present_bill = totalReading * cubicMeters[4].cubic_rate
+    
+            }
+        }
+        if(item.usage_type.toLowerCase()==="commercial"){
+    
+            if(totalReading <=cubicMeters[5].max_cubic){
+    
+                present_bill=cubicMeters[5].fixed_rate
+    
+            }else if(totalReading>=cubicMeters[6].min_cubic && totalReading<=cubicMeters[1].max_cubic){
+    
+                present_bill = totalReading * cubicMeters[6].cubic_rate
+    
+            }else if(totalReading>=cubicMeters[7].min_cubic && totalReading<=cubicMeters[2].max_cubic){
+                
+                present_bill = totalReading * cubicMeters[7].cubic_rate
+    
+            }else if(totalReading>=cubicMeters[8].min_cubic && totalReading<=cubicMeters[8].max_cubic){
+    
+                present_bill = totalReading * cubicMeters[8].cubic_rate
+    
+            }else if(totalReading>=cubicMeters[9].min_cubic){
+    
+                present_bill = totalReading * cubicMeters[9].cubic_rate
+            }
+        }
+    }
+    if(reading - plus -plus <previousReading){
+            pressableminus=true
+        }else pressableminus=false
     const addCubicMeter = () => {
         setReading(reading+plus)
         setDisableSubtract(false)
+        // if(reading - plus -plus <previousReading){
+        //     setDisableSubtract(true)
+        // }else setDisableSubtract(true)
     }
     const subtractCubicMeter = () => {
         setDisableSubtract(false)
@@ -40,6 +102,11 @@ const ConsumerMeter = ({
         if(previousReading+1>=reading){
             setDisableSubtract(true)
         }
+        setDisableSubtract(pressableminus)
+        console.log(pressableminus)
+        // if(reading - plus -plus <previousReading){
+        //     setDisableSubtract(true)
+        // }else setDisableSubtract(false)
     }
     const submitReading =  ( consumer_id, reading_latest, reading_img, table) => {
        
@@ -269,7 +336,7 @@ const ConsumerMeter = ({
             paddingHorizontal:30,
             margin:30,
             backgroundColor:'green',
-            borderRadius:10,
+            borderRadius:5,
             flexDirection:'row',
             alignItems:'center',
             justifyContent:'center',
@@ -286,7 +353,33 @@ const ConsumerMeter = ({
             marginHorizontal:5,
             color:'white',
             fontWeight:'bold'
-        }
+        },
+        cancel:{
+          backgroundColor:'rgba(136, 136, 136, 1)',
+          borderRadius: 2,
+          padding: 10,
+          elevation: 2,
+          marginHorizontal:10
+        },
+        buttonsContainer:{
+          flexDirection:'row',
+          width:280,
+          justifyContent:'flex-end',
+          padding:10
+        },
+        button: {
+          borderRadius: 2,
+          padding: 10,
+          elevation: 2,
+        },
+        buttonClose: {
+          backgroundColor:'#27B735',
+        },
+        textStyle: {
+          color: 'white',
+          textAlign: 'center',
+          fontSize:16
+        },
     })
     return ( 
         <View style={styles.meter}>
@@ -329,6 +422,25 @@ const ConsumerMeter = ({
                                 <Ionicons name="remove-outline" size={30} color={"white"} style={{ margin:5 }} />
                             </LinearGradient>
                         </TouchableOpacity>
+                    <SelectDropdown 
+                        value={plus}
+                        defaultValue={plus}
+                        buttonStyle={{ backgroundColor:'white', borderRadius:5, borderWidth:1, borderColor:'gray', justifyContent:'flex-end', width:80, height:40, borderColor:"black" }}
+                        buttonTextStyle={{ color:"black", fontSize:20 }}
+                        renderDropdownIcon={()=> <Ionicons name="caret-down" size={15} color="black"/>}
+                        dropdownIconPosition="left"
+                        data={plusValues}
+                        rowTextStyle={{ fontSize:20 }}
+                        dropdownStyle={{ marginTop:-28 }}
+                        onSelect={(selectedItem, index) => {
+                            setPlus(selectedItem)
+                            setDisableSubtract(pressableminus)
+                            // if(reading - plus -plus <previousReading){
+                            //     setDisableSubtract(true)
+                            // }else setDisableSubtract(false)
+                        }}
+                        itemStyle={{justifyContent: 'flex-start|flex-end|center', color:'white'}}
+                    />
                         <TouchableOpacity style={styles.plus} onPress={()=>{
                             addCubicMeter()
                         }}>
@@ -372,15 +484,16 @@ const ConsumerMeter = ({
                 </View>
                 <TouchableOpacity 
                 onPress={()=>{
-                    submitReading(data.consumer_id, reading, imageBase64, `read${data.barangay.replace(" ", "")}${data.purok}`);
-                    setReloadHome(!reloadHome)
-                    navigation.goBack()
+                    // submitReading(data.consumer_id, reading, imageBase64, `read${data.barangay.replace(/ /g,"").replace("(","").replace(")","").replace("-","")}${data.purok}`);
+                    // setReloadHome(!reloadHome)
+                    // navigation.goBack()
+                    setOpenConfirmSubmit(true)
                 }}
                 disabled={disableSubtract || !image? true:false}
                 >    
                 <LinearGradient colors={disableSubtract || !image?['rgba(218, 218, 218, 1)','rgba(186, 186, 186, 1)']:['#00CA00', '#009A00', '#007C00']} style={styles.submit}> 
-                    <Entypo name={"export"} size={25} color={"white"} />
-                    <Text style={styles.submitText}>Submit</Text>
+                    <Entypo name={"export"} size={20} color={"white"} />
+                    <Text style={styles.submitText}>Read</Text>
                 </LinearGradient>
                 </TouchableOpacity>
                 
@@ -406,6 +519,73 @@ const ConsumerMeter = ({
                     <TouchableOpacity style={{ margin:10 }} onPress={()=>setViewPhoto(false)}>
                         <Ionicons name={"close-circle-outline"} size={40} color={"white"} />
                     </TouchableOpacity>
+                </View>
+            </Modal>
+
+            <Modal
+            animationType='fade'
+            transparent={true}
+            visible={openConfirmSubmit}
+            onRequestClose={() => {
+                setOpenConfirmSubmit(false)
+                }}
+            >
+                <View style={{ alignItems:'center', justifyContent:'center', flex:1, backgroundColor:'rgba(0,0,0,.8)' }}>
+                    <View style={{backgroundColor:'white', borderRadius:3,alignItems:'center', justifyContent:'center' }}>
+                        <View style={{ width:'100%', backgroundColor:'rgb(12,20,52)', padding:10, paddingHorizontal:15, width:300, borderTopLeftRadius:3, borderTopRightRadius:3 }}>
+                            <Text style={{ fontSize:20, color:'white', fontWeight:'bold' }}>Reading Result</Text>
+                        </View>
+                        <View style={{ width:'100%', backgroundColor:'white', padding:10,paddingTop:5, borderBottomLeftRadius:3, borderBottomRightRadius:3, justifyContent:'center', alignItems:'center' }}>
+                            <View style={{ width:260 }}>
+                                <Text style={{ fontSize:11, marginBottom:-5, color:'gray' }}>Name</Text>
+                                <Text style={{ fontSize:18, marginLeft:3 }}>{item.first_name} {item.middle_name} {item.last_name}</Text>
+                                <Text style={{ fontSize:11, marginBottom:-5, color:'gray' }}>Barangay</Text>
+                                <Text style={{ fontSize:16, marginLeft:3 }}>{item.barangay} - Purok {item.purok}</Text>
+                                <Text style={{ fontSize:11, marginBottom:-5, color:'gray' }}>Type</Text>
+                                <Text style={{ fontSize:16, marginLeft:3 }}>{item.usage_type}</Text>
+                            </View>
+                            <View style={{ padding:10,paddingTop:5, margin:5, width:260, backgroundColor:'#D6D8E9', borderRadius:3, justifyContent:'center', alignItems:'center' }}>
+                                <Text style={{ fontSize:18, fontWeight:'bold', color:'#272A37', width:'100%', borderBottomWidth:1, paddingBottom:2 }}>Reading</Text>
+                                <View style={{ width:'100%', padding:4, flexDirection:'row', justifyContent:"space-around" }}>
+                                    <View>
+                                        <Text style={{ fontSize:12, width:100,color:'#494949', marginBottom:-5 }}>Previous</Text>
+                                        <Text style={{ fontSize:25, width:100,color:'#494949', fontWeight:'bold' }}>{paddedPreviousReading}</Text>
+
+                                    </View>
+                                    <View>
+                                        <Text style={{ fontSize:12, width:100,color:'#494949', marginBottom:-5 }}>Present</Text>
+                                        <Text style={{ fontSize:25, width:100,color:'#494949', fontWeight:'bold' }}>{paddedPresentReading}</Text>
+                                    </View>
+                                </View>
+                                <View style={{ width:'90%' }}>
+                                    <Text style={{ fontSize:16, fontWeight:'bold', color:'#272A37', width:'100%', }}>Total : {reading - previousReading} cu m</Text>
+                                </View>
+                            </View>
+                            <View style={{ padding:10,paddingTop:5, margin:5, width:260, backgroundColor:'#E0E3F3', borderRadius:3, justifyContent:'center', alignItems:'center' }}>
+                                <Text style={{ fontSize:18, fontWeight:'bold', color:'#272A37', width:'100%',  }}>Partial Bill : ₱ {present_bill}</Text>
+                            </View>
+                            <View style={styles.buttonsContainer}>
+                                <TouchableOpacity
+                                style={styles.cancel}
+                                onPress={() => {
+                                    setOpenConfirmSubmit(false)
+                                }}>
+                                <Text style={{ ...styles.textStyle, color:'white' }}>Cancel</Text>
+                                </TouchableOpacity>
+
+                                <TouchableOpacity
+                                style={[styles.button, styles.buttonClose]}
+                                onPress={() => {
+                                    submitReading(data.consumer_id, reading, imageBase64, `read${data.barangay.replace(/ /g,"").replace("(","").replace(")","").replace("-","")}${data.purok}`);
+                                    setReloadHome(!reloadHome)
+                                    setOpenConfirmSubmit(false)
+                                    navigation.goBack()
+                                    }}>
+                                <Text style={{ ...styles.textStyle, marginHorizontal:10 }}>Save</Text>
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+                    </View>
                 </View>
             </Modal>
 

@@ -57,7 +57,7 @@ const CameraController = ({openCam, setOpenCam, image, setImage, cameraRef, imag
     // }
     if (cameraRef.current) {
         const options = {
-          quality: 0.1,
+          quality: 0.3,
           pictureSize: '240x240',
           base64:true,
         };

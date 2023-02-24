@@ -1,18 +1,19 @@
-import { Text, View, StyleSheet, Modal, TouchableOpacity } from "react-native";
+import { Text, View, StyleSheet, Modal, TouchableOpacity, Alert } from "react-native";
 import Body from "./HomeComponents/Body";
 import Nav from "./HomeComponents/Nav";
 import { useEffect, useState, useRef } from "react";
 import * as SQLite from 'expo-sqlite'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { Ionicons, Entypo } from '@expo/vector-icons';
+import GetData from "../Hooks/GetData";
 
-const Home = ({reloadHome, setReloadHome, setIsLogin}) => {
+const Home = ({reloadHome, setReloadHome, setIsLogin, readerDetails}) => {
     const [data , setData] = useState([])
     const [reloadGenerated, setReloadGenerated] = useState(true)
     const [openProfile, setOpenProfile]= useState(false);
-    const [readerDetails , setReaderDetails] = useState({user_id:'', user_email:''})
     const db = SQLite.openDatabase("ready.db")
-
+  const cubicMeters = GetData('/settings')
+  console.log(cubicMeters.data && cubicMeters.data.cubic_rates)
     const logout = async() => {
       AsyncStorage.setItem("user_type","")
       AsyncStorage.setItem("user_token","")
@@ -22,15 +23,23 @@ const Home = ({reloadHome, setReloadHome, setIsLogin}) => {
       const token = await AsyncStorage.getItem("user_token")
       console.log(token)
     }
-    const getReader =async()=> {
-      const token = await AsyncStorage.getItem("user_token")
-      const user_id = await AsyncStorage.getItem("user_id")
-      const user_email = await AsyncStorage.getItem("user_email")
-      setReaderDetails({user_id:user_id, user_email:user_email})
-      console.log(token)
+
+    const storeDataAsyncStorage = async (key, value) => {
+      try {
+        await AsyncStorage.setItem(
+          key,
+          value,
+        );
+      } catch (error) {
+        Alert.alert("Saving Data Error!", "Please try again",[
+          {text:"Ok", onPress: ()=> {}}
+        ])
+        console.log(error)
+      }
     }
 
     useEffect(()=>{
+        {cubicMeters.data && storeDataAsyncStorage("cubic_rates",cubicMeters.data.cubic_rates)}
         const executeSqlWithPromise = (tx, sql, params) => {
           return new Promise((resolve, reject) => {
             tx.executeSql(
@@ -41,13 +50,13 @@ const Home = ({reloadHome, setReloadHome, setIsLogin}) => {
             );
           });
         };
-        
         db.transaction(tx => {
           executeSqlWithPromise(tx, 'SELECT name FROM sqlite_master WHERE type="table";', [])
             .then(({ rows }) => {
               const tableNames = [];
               for (let i = 0; i < rows.length; i++) {
                 if(rows.item(i).name.includes("read")){
+                  console.log(rows)
                   tableNames.push({name: rows.item(i).name});
                 }
               }
@@ -96,7 +105,6 @@ const Home = ({reloadHome, setReloadHome, setIsLogin}) => {
                   }
                   
               getData()
-              getReader()
             })
             .catch(error => console.error(error));
         });
@@ -134,12 +142,8 @@ const Home = ({reloadHome, setReloadHome, setIsLogin}) => {
                       <Text style={styles.readerIdText}>Reader ID - {readerDetails.user_id}</Text>
                       <View style={styles.readerDetails}>
                         <View style={styles.readerDetailsContainer}>
-                          <Ionicons name="mail-outline" size={20} color={"black"} style={styles.icon} />
-                          <Text style={styles.readerEmailText}>Email : {readerDetails.user_email}</Text>
-                        </View>
-                        <View style={styles.readerDetailsContainer} >
-                          <Ionicons name="mail-outline" size={20} color={"black"} style={styles.icon} />
-                          <Text style={styles.readerEmailText}>Email : {readerDetails.user_email}</Text>
+                          <Ionicons name="person" size={20} color={"black"} style={styles.icon} />
+                          <Text style={styles.readerEmailText}>Username : {readerDetails.user_email}</Text>
                         </View>
                       </View>
                       <TouchableOpacity onPress={()=>logout()} style={styles.logoutbutton}>

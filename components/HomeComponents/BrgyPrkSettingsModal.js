@@ -2,14 +2,18 @@ import { Modal, StyleSheet, Text, View, TouchableOpacity } from "react-native";
 import { Ionicons } from '@expo/vector-icons';
 import { useState } from "react";
 import { LinearGradient } from 'expo-linear-gradient';
+import { useNavigation } from "@react-navigation/native";
 
 const SettingModal = ({
     openSettings,
     setOpenSettings,
     openConfirm,
     setOpenConfirm,
-    areadata
+    areadata,
+    readConsumers,
+    totalConsumer
 }) => {
+    const navigation = useNavigation()
     const styles = StyleSheet.create({
         container:{
             backgroundColor:'white',
@@ -75,11 +79,15 @@ const SettingModal = ({
                     </View>
                     <View style={styles.content}>
                         <TouchableOpacity 
-                            onPress={()=>{setOpenSettings(!openSettings)}} style={{ width:'100%',...styles.optionButtons }}>
+                            onPress={()=>{
+                                setOpenSettings(!openSettings)
+                                navigation.navigate("ReadConsumers", {readConsumers, totalConsumer, areadata})
+                            }
+                                } style={{ width:'100%',...styles.optionButtons }}>
                                 <LinearGradient colors={['#66CD00', '#8DCE4D', '#A7DC72']} style={{ width:'100%', borderRadius:4, justifyContent:'center' }}>
                                     <Ionicons name="list-circle-outline" color={"white"} size={25} style={{ position:'absolute', left:10 }}/>
                                     <Text style={{  color:'white', fontWeight:'bold', fontSize:16, marginHorizontal:25, textAlign:'center', marginVertical:10 }}>
-                                        List of Readed Consumers
+                                        Read Consumers
                                     </Text>
                                 </LinearGradient>
                         </TouchableOpacity>
@@ -91,7 +99,7 @@ const SettingModal = ({
                                 <LinearGradient colors={['#cc0000', '#C33434', '#DE8383']} style={{ width:'100%', borderRadius:4, justifyContent:'center' }}>
                                     <Ionicons name="trash-outline" color={"white"} size={25} style={{ position:'absolute', left:10 }}/>
                                     <Text style={{  color:'white', fontWeight:'bold', fontSize:16, marginHorizontal:25, textAlign:'center', marginVertical:10 }}>
-                                        Remove Barangay Purok
+                                        Delete Barangay Purok
                                     </Text>
                                 </LinearGradient>
                         </TouchableOpacity>

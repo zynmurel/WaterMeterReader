@@ -1,15 +1,28 @@
 import { StyleSheet, View, TouchableOpacity, Text } from "react-native";
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from "@react-navigation/native";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import * as SQLite from 'expo-sqlite';
 import ConsumerMeter from "./HomeComponents/ConsumerMeter";
+import AsyncStorage from '@react-native-async-storage/async-storage'
+
 const ConsumerPage = ({route, reloadHome, setReloadHome}) => {
+    const getCubicMeters =async()=> {
+        const cubic_rates = await AsyncStorage.getItem("cubic_rates")
+        //const parsed = JSON.parse(cubicMeters && cubicMeters.data.cubic_rates)
+        setCubicMeters(JSON.parse(cubic_rates))
+      }
     const back = () => {
         navigation.goBack()
     }
     const { item } = route.params;
     const [reading, setReading] = useState(item.present_reading===""?0:item.present_reading)
     const navigation = useNavigation()
+    const db = SQLite.openDatabase('ready.db'); 
+    const [cubicMeters, setCubicMeters] = useState([])
+    useEffect(()=>{
+        getCubicMeters();
+    },[])
     const styles = StyleSheet.create({
         container:{
             flex:1,
@@ -98,12 +111,14 @@ const ConsumerPage = ({route, reloadHome, setReloadHome}) => {
 
                 </View>
                 <ConsumerMeter
+                cubicMeters={cubicMeters}
                 data={item}
                 previousReading = { item.present_reading===""?0:item.present_reading}
                 reading={reading}
                 setReading={setReading}
                 reloadHome={reloadHome}
                 setReloadHome={setReloadHome}
+                item={item}
                 />
 
             </View>

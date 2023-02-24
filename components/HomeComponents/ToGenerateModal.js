@@ -18,7 +18,7 @@ const ToGenerateModal = ({
     useEffect(()=>{
       let x= false
       generated.forEach((gen)=>{
-        if(gen.name === `read${barangay.replace(" ","")}${purok}`){
+        if(gen.name === `read${barangay.replace(/ /g,"").replace("(","").replace(")","").replace("-","")}${purok}`){
           x = true
         }
       })
@@ -26,7 +26,7 @@ const ToGenerateModal = ({
     },[toReadReload])
     const onGenerate =() => {
         db.transaction(tx => {
-            tx.executeSql(`CREATE TABLE IF NOT EXISTS read${barangay.replace(" ","")}${purok} (consumer_id TEXT, first_name TEXT, middle_name TEXT, last_name TEXT, gender TEXT, phone TEXT, barangay, TEXT, purok TEXT, service_period_id_to_be INTEGER, service_period TEXT, reading_id INTEGER, previous_reading INTEGER, present_reading INTEGER, reading_date INTEGER, reading_latest INTEGER, reading_img TEXT)`)  
+            tx.executeSql(`CREATE TABLE IF NOT EXISTS read${barangay.replace(/ /g,"").replace("(","").replace(")","").replace("-","")}${purok} (consumer_id TEXT, first_name TEXT, middle_name TEXT, last_name TEXT, gender TEXT, phone TEXT, barangay TEXT, purok TEXT, service_period_id_to_be INTEGER, service_period TEXT, reading_id INTEGER, previous_reading INTEGER, present_reading INTEGER, reading_date INTEGER, reading_latest INTEGER, reading_img TEXT, is_read BOOLEAN, usage_type TEXT)`)  
         });
 
         // db.transaction(tx => {
@@ -39,8 +39,8 @@ const ToGenerateModal = ({
          db.transaction(tx => {
             toRead.forEach(con=> {
               tx.executeSql(
-                `INSERT INTO read${barangay.replace(" ","")}${purok} (consumer_id, first_name, middle_name, last_name, gender, phone, barangay, purok , service_period_id_to_be , service_period , reading_id , previous_reading , present_reading , reading_date , reading_latest , reading_img) VALUES (?, ?, ?, ?, ?, ?, ?, ? , ? , ? , ? , ? , ? , ? , ? , ?);`,
-                [con.consumer_id, con.first_name, con.middle_name, con.last_name, con.gender, con.phone, con.barangay, con.purok, con.service_period_id_to_be, con.service_period, con.reading_id, con.previous_reading, con.present_reading, con.reading_date, con.reading_latest, con.reading_img ]
+                `INSERT INTO read${barangay.replace(/ /g,"").replace("(","").replace(")","").replace("-","")}${purok} (consumer_id, first_name, middle_name, last_name, gender, phone, barangay, purok , service_period_id_to_be , service_period , reading_id , previous_reading , present_reading , reading_date , reading_latest , reading_img, is_read, usage_type) VALUES (?, ?, ?, ?, ?, ?, ?, ? , ? , ? , ? , ? , ? , ? , ? , ?, ?, ?);`,
+                [con.consumer_id, con.first_name, con.middle_name, con.last_name, con.gender, con.phone, con.barangay, con.purok, con.service_period_id_to_be, con.service_period, con.reading_id, con.previous_reading, con.present_reading, con.reading_date, con.reading_latest, con.reading_img, 0, con.usage_type ]
               );
             });
           });
@@ -75,7 +75,7 @@ const ToGenerateModal = ({
             elevation: 2,
           },
           buttonClose: {
-            backgroundColor: toReadIsPending || (toRead && toRead.length===0) || generated.length>=5 ||activeGenerate? 'rgba(173, 173, 173, 1)':'#27B735',
+            backgroundColor: toReadIsPending || (toRead && toRead.length===0) || generated.length>=10 ||activeGenerate? 'rgba(173, 173, 173, 1)':'#27B735',
           },
           textStyle: {
             color: 'white',
@@ -176,7 +176,7 @@ const ToGenerateModal = ({
 
                 <TouchableOpacity
                 style={[styles.button, styles.buttonClose]}
-                disabled={toReadIsPending || (toRead && toRead.length===0) || generated.length>=5 || activeGenerate ? true:false}
+                disabled={toReadIsPending || (toRead && toRead.length===0) || generated.length>=10 || activeGenerate ? true:false}
                 onPress={() => {
                     setModalVisible(!modalVisible)
                     onGenerate()
