@@ -292,20 +292,6 @@ const ReadConsumers = ({readerDetails, reloadHome, setReloadHome}) => {
                 { submittedConsumersCount.length === consumers.length  &&
                    <>
                    <Text style={styles.warn}>All Read Consumer/s have already Submitted</Text> 
-                   <TouchableOpacity  style={{ flexDirection:'row', alignItems:'center', justifyContent:'center', borderRadius:5, marginTop:20, marginHorizontal:40 }}
-                   onPress={()=>{
-                       }
-                    }>
-                    <LinearGradient colors={['#8DCE4D', '#66CD00', '#A7DC72']} style={{ width:'100%', borderRadius:2, justifyContent:'center',flexDirection:'row', alignItems:'center',
-                elevation: 1,
-                    borderWidth:1,
-                    borderColor:'#A7DC72' }}>
-                    <Ionicons name="list" color={"white"} size={20} style={{ marginTop:3 }}  />
-                        <Text style={{  color:'white', fontSize:14, marginHorizontal:20, textAlign:'center', marginVertical:8, width:180 }}>
-                            Submitted Read Consumer/s 
-                        </Text>
-                    </LinearGradient>
-                   </TouchableOpacity>
                    <TouchableOpacity  style={{ flexDirection:'row', alignItems:'center', justifyContent:'center', borderRadius:5, margin:20, marginHorizontal:40 }}
                    onPress={()=>{
                     setOpenConfirm(true)
