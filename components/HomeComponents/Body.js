@@ -69,7 +69,7 @@ const Body = ({db, data:generated, setReloadGenerated, reloadGenerated}) => {
     return ( 
         <>
             <View style={styles.body}>
-                <Text style={ styles.date}>{`${month[dateNow.getMonth()].slice(0,3).toUpperCase()} ${dateNow.getFullYear()}`}</Text>
+                <Text style={ styles.date}>{`${month[dateNow.getMonth()-1].slice(0,3).toUpperCase()} ${dateNow.getFullYear()}`}</Text>
                 <View style={styles.purokbarangay}>
                 <SelectDropdown 
                 style={{ color:'red' }}
